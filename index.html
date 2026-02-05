@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Curve Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Canvas Container -->
+        <div id="canvas-container">
+            <svg id="main-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <pattern id="grid" width="96" height="96" patternUnits="userSpaceOnUse">
+                        <path d="M 96 0 L 0 0 0 96" fill="none" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+                    </pattern>
+                    <linearGradient id="gradient-fill" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:rgb(0,0,0);stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+                <g id="curve-group"></g>
+                <g id="ui-layer">
+                    <!-- Points and Handles will be rendered here -->
+                </g>
+            </svg>
+            <div id="coordinate-readout">0.00", 0.00"</div>
+        </div>
+
+        <div id="canvas3d-container" class="hidden"></div>
+
+        <!-- Floating UI Panel -->
+        <div id="controls-panel">
+            <header>
+                <h1>Organic Curve</h1>
+                <div class="view-toggle">
+                    <button id="view-2d-btn" class="toggle-btn active">2D</button>
+                    <button id="view-3d-btn" class="toggle-btn">3D</button>
+                </div>
+            </header>
+
+            <div class="control-group">
+                <label>Start Scale (Outer)</label>
+                <div class="control-group row">
+                    <input type="range" id="start-scale-slider" min="0.5" max="0.99" step="0.01" value="0.9">
+                    <span id="start-scale-val">0.90</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>End Scale (Inner)</label>
+                <div class="control-group row">
+                    <input type="range" id="end-scale-slider" min="0.5" max="0.99" step="0.01" value="0.9">
+                    <span id="end-scale-val">0.90</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <h3>Colors</h3>
+                <div class="control-group row">
+                    <div class="input-wrap">
+                        <span>Start</span>
+                        <input type="color" id="color-start-picker" value="#646cff">
+                    </div>
+                    <div class="input-wrap">
+                        <span>End</span>
+                        <input type="color" id="color-end-picker" value="#ff4488">
+                    </div>
+                    <div class="input-wrap">
+                        <span>Sides</span>
+                        <input type="color" id="color-sides-picker" value="#3d2817">
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>Min Size (in)</label>
+                <input type="number" id="min-size-input" value="1.0" step="0.1" min="0.1">
+            </div>
+
+            <div class="control-group row">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="emphasize-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Emphasize Base</span>
+            </div>
+
+            <div id="controls-3d" class="hidden">
+                <div class="divider"></div>
+                <h3>3D Parameters</h3>
+
+                <div class="control-group">
+                    <label>Material Thickness (in)</label>
+                    <div class="control-group row">
+                        <input type="range" id="thickness-slider" min="0.01" max="0.5" step="0.01" value="0.11">
+                        <span id="thickness-val">0.11</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Z-Rise (in)</label>
+                    <div class="control-group row">
+                        <input type="range" id="z-rise-slider" min="0" max="0.5" step="0.01" value="0.05">
+                        <span id="z-rise-val">0.05</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Base Rotation (deg)</label>
+                    <div class="control-group row">
+                        <input type="range" id="rotation-slider" min="-45" max="45" step="1" value="0">
+                        <span id="rotation-val">0°</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Pivot Start (dist)</label>
+                    <div class="control-group row">
+                        <input type="range" id="pivot-start-slider" min="0" max="1" step="0.01" value="0">
+                        <span id="pivot-start-val">0.00</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Pivot End (dist)</label>
+                    <div class="control-group row">
+                        <input type="range" id="pivot-end-slider" min="0" max="1" step="0.01" value="0.2">
+                        <span id="pivot-end-val">0.20</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Gradient Center</label>
+                    <div class="control-group row">
+                        <input type="range" id="gradient-center-slider" min="0" max="1" step="0.01" value="0.5">
+                        <span id="gradient-center-val">0.50</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <h3>Selected Point (in)</h3>
+                <div class="coord-inputs">
+                    <div class="input-wrap">
+                        <span>X</span>
+                        <input type="number" id="pt-x" step="0.1" disabled>
+                    </div>
+                    <div class="input-wrap">
+                        <span>Y</span>
+                        <input type="number" id="pt-y" step="0.1" disabled>
+                    </div>
+                </div>
+                <button id="delete-pt-btn" disabled>Delete Point</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <button id="export-btn" class="primary-btn">Download SVG</button>
+
+            <div class="instructions">
+                <p><strong>Left Click</strong> to add points.</p>
+                <p><strong>Drag</strong> points to edit.</p>
+                <p><strong>Double Click</strong> point to delete.</p>
+                <p><strong>Drag Cross</strong> to set convergence.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+          }
+        }
+    </script>
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

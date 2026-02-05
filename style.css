@@ -1,0 +1,289 @@
+:root {
+    --bg-color: #0f0f13;
+    --panel-bg: rgba(30, 30, 35, 0.7);
+    --primary: #646cff;
+    --primary-hover: #7b83ff;
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    --border: rgba(255, 255, 255, 0.1);
+    --font-family: 'Inter', sans-serif;
+    --ppi: 96px; /* Define screen pixels per inch for display scaling */
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-family);
+    overflow: hidden;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+}
+
+#canvas-container, #canvas3d-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#canvas3d-container {
+    background: #111;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#canvas-container {
+    flex: 1;
+    position: relative;
+    cursor: crosshair;
+    background: radial-gradient(circle at center, #1a1a20 0%, #0f0f13 100%);
+}
+
+#main-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#coordinate-readout {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    pointer-events: none;
+    color: var(--text-muted);
+}
+
+/* UI Panel */
+#controls-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 280px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: transform 0.2s;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+}
+
+h3 {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+header h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.view-toggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px;
+    border-radius: 6px;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+.status-indicator.active {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-group.row {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary);
+}
+
+input[type="number"] {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px;
+    color: var(--text-main);
+    font-family: monospace;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.coord-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.input-wrap span {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+button.primary-btn {
+    background: var(--primary);
+    border-color: transparent;
+    font-weight: 500;
+}
+
+button.primary-btn:hover {
+    background: var(--primary-hover);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border);
+    width: 100%;
+}
+
+.instructions {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.instructions p {
+    margin: 4px 0;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255,255,255,0.1);
+    transition: .4s;
+    border-radius: 20px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: var(--primary);
+}
+input:checked + .slider:before {
+    transform: translateX(16px);
+}
