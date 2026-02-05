@@ -258,8 +258,8 @@ export function update3D(nests, state) {
             const pivot = { x: props.point.x, y: -props.point.y, z: 0 };
             const normal = { x: props.normal.x, y: -props.normal.y, z: 0 };
 
-            // a. Apply Z-Rise translation
-            const zStep = k * state.zRise;
+            // a. Apply Z-Rise translation (linked to thickness)
+            const zStep = k * state.thickness;
 
             // b. Apply Rotation
             // We want to rotate around the axis (normal) at the pivot point

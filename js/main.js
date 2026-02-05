@@ -1,8 +1,8 @@
 
 import {
     state, subscribe, addPoint, updatePoint, setConvergence, deletePoint,
-    setStartScale, setEndScale, setMinSize, setEmphasis,
-    setViewMode, setThickness, setZRise, setBaseRotation, setPivotStart, setPivotEnd,
+    setStartScale, setEndScale, setMinSize,
+    setViewMode, setThickness, setBaseRotation, setPivotStart, setPivotEnd,
     setColorStart, setColorEnd, setColorSides, setGradientCenter
 } from './state.js';
 import { getCatmullRomBezierPath, generateNests, pathToSvgD, interpolateColor } from './math.js';
@@ -21,7 +21,6 @@ const inputs = {
     endScale: document.getElementById('end-scale-slider'),
     endScaleVal: document.getElementById('end-scale-val'),
     minSize: document.getElementById('min-size-input'),
-    emphasize: document.getElementById('emphasize-toggle'),
     ptX: document.getElementById('pt-x'),
     ptY: document.getElementById('pt-y'),
     deleteBtn: document.getElementById('delete-pt-btn'),
@@ -35,8 +34,6 @@ const inputs = {
     controls3d: document.getElementById('controls-3d'),
     thickness: document.getElementById('thickness-slider'),
     thicknessVal: document.getElementById('thickness-val'),
-    zRise: document.getElementById('z-rise-slider'),
-    zRiseVal: document.getElementById('z-rise-val'),
     rotation: document.getElementById('rotation-slider'),
     rotationVal: document.getElementById('rotation-val'),
     pivotStart: document.getElementById('pivot-start-slider'),
@@ -94,20 +91,9 @@ function render(state) {
         pathEl.setAttribute('fill', 'none');
 
         // Emphasize Logic
-        if (state.emphasizeBase) {
-            if (index === 0) {
-                pathEl.setAttribute('stroke', 'rgba(255, 255, 255, 0.9)');
-                pathEl.setAttribute('stroke-width', '3'); // 3px on screen
-            } else {
-                pathEl.setAttribute('stroke', 'rgba(255, 255, 255, 0.3)');
-                pathEl.setAttribute('stroke-width', '1'); // 1px on screen
-            }
-        } else {
-            // Spatial Gradient Logic
-            pathEl.setAttribute('stroke', 'url(#gradient-fill)');
-            pathEl.setAttribute('stroke-width', '1.5'); // 1.5px on screen
-            pathEl.setAttribute('vector-effect', 'non-scaling-stroke'); // Keep crisp
-        }
+        pathEl.setAttribute('stroke', 'url(#gradient-fill)');
+        pathEl.setAttribute('stroke-width', '1.5'); // 1.5px on screen
+        pathEl.setAttribute('vector-effect', 'non-scaling-stroke'); // Keep crisp
 
         curveGroup.appendChild(pathEl);
     });
@@ -162,14 +148,12 @@ function updateUIControls(s) {
     inputs.startScaleVal.innerText = s.startScale.toFixed(2);
     if (document.activeElement !== inputs.endScale) inputs.endScale.value = s.endScale;
     inputs.endScaleVal.innerText = s.endScale.toFixed(2);
-    if (document.activeElement !== inputs.minSize) inputs.minSize.value = s.minSize;
-    inputs.emphasize.checked = s.emphasizeBase;
+    inputs.minSize.value = s.minSize;
 
     // 3D Controls
     inputs.thickness.value = s.thickness;
     inputs.thicknessVal.innerText = s.thickness.toFixed(2);
-    inputs.zRise.value = s.zRise;
-    inputs.zRiseVal.innerText = s.zRise.toFixed(2);
+
     inputs.rotation.value = s.baseRotation;
     inputs.rotationVal.innerText = s.baseRotation + '°';
     inputs.pivotStart.value = s.pivotStart;
@@ -379,7 +363,6 @@ svgEl.addEventListener('click', e => {
 inputs.startScale.addEventListener('input', e => setStartScale(parseFloat(e.target.value)));
 inputs.endScale.addEventListener('input', e => setEndScale(parseFloat(e.target.value)));
 inputs.minSize.addEventListener('change', e => setMinSize(parseFloat(e.target.value)));
-inputs.emphasize.addEventListener('change', e => setEmphasis(e.target.checked));
 
 inputs.ptX.addEventListener('change', e => {
     if (state.selectedPointIndex !== -1) {
@@ -399,7 +382,6 @@ inputs.deleteBtn.addEventListener('click', () => {
 inputs.view2d.addEventListener('click', () => setViewMode('2d'));
 inputs.view3d.addEventListener('click', () => setViewMode('3d'));
 inputs.thickness.addEventListener('input', e => setThickness(parseFloat(e.target.value)));
-inputs.zRise.addEventListener('input', e => setZRise(parseFloat(e.target.value)));
 inputs.rotation.addEventListener('input', e => setBaseRotation(parseFloat(e.target.value)));
 inputs.pivotStart.addEventListener('input', e => setPivotStart(parseFloat(e.target.value)));
 inputs.pivotEnd.addEventListener('input', e => setPivotEnd(parseFloat(e.target.value)));

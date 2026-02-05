@@ -13,15 +13,14 @@ export const state = {
     convergence: { x: 5, y: 5 },
 
     // Parameters
-    startScale: 0.9,
-    endScale: 0.9,
+    startScale: 0.92,
+    endScale: 0.74,
     minSize: 1.0, // inches
-    emphasizeBase: false,
+
 
     // 3D parameters
     viewMode: '2d', // '2d' | '3d'
     thickness: 0.11, // material thickness in inches
-    zRise: 0.05,    // vertical step per rib in inches
     baseRotation: 0, // base rotation angle in degrees
     pivotStart: 0,   // pivot position along curve (0.0 to 1.0)
     pivotEnd: 0.2,   // pivot position along curve (0.0 to 1.0)
@@ -124,10 +123,7 @@ export function setMinSize(val) {
     notify();
 }
 
-export function setEmphasis(val) {
-    state.emphasizeBase = val;
-    notify();
-}
+
 
 export function setViewMode(mode) {
     state.viewMode = mode;
@@ -139,10 +135,7 @@ export function setThickness(val) {
     notify();
 }
 
-export function setZRise(val) {
-    state.zRise = val;
-    notify();
-}
+
 
 export function setBaseRotation(val) {
     state.baseRotation = val;
