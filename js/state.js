@@ -23,7 +23,6 @@ export const state = {
     thickness: 0.11, // material thickness in inches
     baseRotation: 0, // base rotation angle in degrees
     pivotStart: 0,   // pivot position along curve (0.0 to 1.0)
-    pivotEnd: 0.2,   // pivot position along curve (0.0 to 1.0)
     gradientCenter: 0.5, // position of gradient center (0.0 = left, 1.0 = right)
 
     // Colors
@@ -147,10 +146,6 @@ export function setPivotStart(val) {
     notify();
 }
 
-export function setPivotEnd(val) {
-    state.pivotEnd = val;
-    notify();
-}
 
 export function setGradientCenter(val) {
     state.gradientCenter = val;

@@ -140,26 +140,43 @@ export function update3D(nests, state) {
 
     if (nests.length < 2) return;
 
-    // Material for ribs
-    // Material for ribs (Moved inside loop for individual colors)
-    // const material = new THREE.MeshPhongMaterial({ ... });
+    // 1. Calculate Global Pivot from Base Curve (nests[0])
+    // User requested "all pivot points to be aligned on top of each other".
+    // This means we calculate ONE pivot point from the base (outer) curve,
+    // and use that same X,Y location as the center of rotation for ALL layers.
+    let globalPivot = { x: 0, y: 0, z: 0 };
+
+    // Use Pivot Start (renamed to Position) to find point on base curve
+    const baseCurve = nests[0];
+    const props = getPathPropertiesAt(baseCurve, state.pivotStart);
+    if (props) {
+        globalPivot = { x: props.point.x, y: -props.point.y, z: 0 };
+    }
+
+    // Material Colors
+    const colorStart = new THREE.Color(state.colorStart);
+    const colorEnd = new THREE.Color(state.colorEnd);
+    const colorSides = new THREE.Color(state.colorSides);
+
+    // Shared resources for Pivot Visualization (Yellow Spheres)
+    // Reduce segments slightly for performance since there will be many
+    const pivotGeom = new THREE.SphereGeometry(state.thickness / 2, 8, 8);
+    const pivotMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
 
     // Create rib segments (rings)
     for (let k = 0; k < nests.length - 1; k++) {
         const outerCurve = nests[k];
         const innerCurve = nests[k + 1];
 
+        // ... (Shape creation omitted for brevity, keeping existing code) ...
         // 1. Create Shape with Hole
         const shape = new THREE.Shape();
-
-        // Outer loop
         const p0 = outerCurve[0].p1;
-        shape.moveTo(p0.x, -p0.y); // Flip Y to match SVG coordinate system vs 3D
+        shape.moveTo(p0.x, -p0.y);
         outerCurve.forEach(seg => {
             shape.bezierCurveTo(seg.c1.x, -seg.c1.y, seg.c2.x, -seg.c2.y, seg.p2.x, -seg.p2.y);
         });
 
-        // Inner loop (hole)
         const holePath = new THREE.Path();
         const ph = innerCurve[0].p1;
         holePath.moveTo(ph.x, -ph.y);
@@ -176,12 +193,7 @@ export function update3D(nests, state) {
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
         // --- Setup Materials ---
-        // ExtrudeGeometry creates groups: group 0 = front/back caps, group 1 = sides (when no bevel)
-        const colorStart = new THREE.Color(state.colorStart);
-        const colorEnd = new THREE.Color(state.colorEnd);
-        const colorSides = new THREE.Color(state.colorSides);
-
-        // Calculate Bounding Box of the Outer Curve for Normalization
+        // Calculate Bounding Box of the Outer Curve for Normalization (Gradient)
         let minX = Infinity, maxX = -Infinity;
         outerCurve.forEach(seg => {
             minX = Math.min(minX, seg.p1.x, seg.c1.x, seg.c2.x, seg.p2.x);
@@ -222,7 +234,6 @@ export function update3D(nests, state) {
 
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-        // Create two materials: one for caps (with vertex colors), one for sides (solid color)
         const capMaterial = new THREE.MeshPhongMaterial({
             vertexColors: true,
             specular: 0x111111,
@@ -237,49 +248,42 @@ export function update3D(nests, state) {
             side: THREE.DoubleSide
         });
 
-        // Debug: Log geometry groups to understand the structure
-        console.log('Geometry groups:', geometry.groups);
-
-        // Ensure material indices are correctly set:
-        // ExtrudeGeometry creates: Group 0 (materialIndex 0) = caps, Group 1 (materialIndex 1) = sides
-        // We pass materials in order: [capMaterial, sideMaterial] so index 0 = caps, index 1 = sides
         const mesh = new THREE.Mesh(geometry, [capMaterial, sideMaterial]);
 
-        // 3. Transformations
+        // 3. Transformations with Global Pivot
+        const zStep = k * state.thickness;
+        const angleRad = (k * state.baseRotation * Math.PI) / 180;
 
-        // Pivot Interpolation
-        // Interpolate distance between pivotStart and pivotEnd
-        const t_rib = k / Math.max(1, nests.length - 2);
-        const pivotDist = state.pivotStart + (state.pivotEnd - state.pivotStart) * t_rib;
-
-        // Get Pivot Point and Normal on OUTER curve
-        const props = getPathPropertiesAt(outerCurve, pivotDist);
-        if (props) {
-            const pivot = { x: props.point.x, y: -props.point.y, z: 0 };
-            const normal = { x: props.normal.x, y: -props.normal.y, z: 0 };
-
-            // a. Apply Z-Rise translation (linked to thickness)
-            const zStep = k * state.thickness;
-
-            // b. Apply Rotation
-            // We want to rotate around the axis (normal) at the pivot point
-            const angleRad = (k * state.baseRotation * Math.PI) / 180;
-
-            // Step-by-step transformation:
-            // 1. Center geometry at pivot: Translate by -pivot
-            // 2. Rotate around normal axis
-            // 3. Translate back to pivot + vertical offset
-
-            mesh.geometry.translate(-pivot.x, -pivot.y, 0); // Move pivot to origin
-
-
-            const axis = new THREE.Vector3(0, 0, 1);
-            mesh.rotateOnAxis(axis, angleRad);
-
-            mesh.position.set(pivot.x, pivot.y, zStep);
+        // ALIGNMENT LOGIC:
+        // Calculate the LOCAL pivot for this specific rib (outerCurve)
+        // and translate the geometry so this local pivot moves to (0,0).
+        // This "stacks" all ribs such that their pivot points are vertically aligned.
+        let localPivot = globalPivot; // Default to global if calculation fails
+        const localProps = getPathPropertiesAt(outerCurve, state.pivotStart);
+        if (localProps) {
+            localPivot = { x: localProps.point.x, y: -localProps.point.y, z: 0 };
         }
 
+        // 1. Center geometry at LOCAL pivot: Translate by -localPivot
+        mesh.geometry.translate(-localPivot.x, -localPivot.y, 0);
+
+        // 2. Rotate around vertical axis (Z) - Axis is now at (0,0) which corresponds to the Local Pivot
+        const axis = new THREE.Vector3(0, 0, 1);
+        mesh.rotateOnAxis(axis, angleRad);
+
+        // 3. Translate to Global Pivot World Position + vertical offset
+        // This places the stack at the original base pivot location
+        mesh.position.set(globalPivot.x, globalPivot.y, zStep);
+
         ribsGroup.add(mesh);
+
+        // ADD PIVOT MARKER FOR THIS RIB
+        const pivotMesh = new THREE.Mesh(pivotGeom, pivotMat);
+        // Position at the pivot point X,Y but at the current layer's Z
+        // Note: The pivot itself isn't rotated (it's the center!), but we want to show the axis.
+        // The axis is vertical line at globalPivot.x, globalPivot.y.
+        pivotMesh.position.set(globalPivot.x, globalPivot.y, zStep);
+        ribsGroup.add(pivotMesh);
     }
 
     // Auto-center camera if needed or just let OrbitControls handle it

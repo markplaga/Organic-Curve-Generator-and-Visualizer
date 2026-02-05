@@ -2,7 +2,7 @@
 import {
     state, subscribe, addPoint, updatePoint, setConvergence, deletePoint,
     setStartScale, setEndScale, setMinSize,
-    setViewMode, setThickness, setBaseRotation, setPivotStart, setPivotEnd,
+    setViewMode, setThickness, setBaseRotation, setPivotStart,
     setColorStart, setColorEnd, setColorSides, setGradientCenter
 } from './state.js';
 import { getCatmullRomBezierPath, generateNests, pathToSvgD, interpolateColor } from './math.js';
@@ -38,8 +38,7 @@ const inputs = {
     rotationVal: document.getElementById('rotation-val'),
     pivotStart: document.getElementById('pivot-start-slider'),
     pivotStartVal: document.getElementById('pivot-start-val'),
-    pivotEnd: document.getElementById('pivot-end-slider'),
-    pivotEndVal: document.getElementById('pivot-end-val'),
+
     gradientCenter: document.getElementById('gradient-center-slider'),
     gradientCenterVal: document.getElementById('gradient-center-val'),
     // Colors
@@ -157,9 +156,8 @@ function updateUIControls(s) {
     inputs.rotation.value = s.baseRotation;
     inputs.rotationVal.innerText = s.baseRotation + '°';
     inputs.pivotStart.value = s.pivotStart;
-    inputs.pivotStartVal.innerText = s.pivotStart.toFixed(2);
-    inputs.pivotEnd.value = s.pivotEnd;
-    inputs.pivotEndVal.innerText = s.pivotEnd.toFixed(2);
+    inputs.pivotStartVal.innerText = (s.pivotStart * 100).toFixed(0) + '%';
+
     inputs.gradientCenter.value = s.gradientCenter;
     inputs.gradientCenterVal.innerText = s.gradientCenter.toFixed(2);
 
@@ -384,7 +382,7 @@ inputs.view3d.addEventListener('click', () => setViewMode('3d'));
 inputs.thickness.addEventListener('input', e => setThickness(parseFloat(e.target.value)));
 inputs.rotation.addEventListener('input', e => setBaseRotation(parseFloat(e.target.value)));
 inputs.pivotStart.addEventListener('input', e => setPivotStart(parseFloat(e.target.value)));
-inputs.pivotEnd.addEventListener('input', e => setPivotEnd(parseFloat(e.target.value)));
+
 inputs.gradientCenter.addEventListener('input', e => setGradientCenter(parseFloat(e.target.value)));
 
 inputs.colorStart.addEventListener('input', e => setColorStart(e.target.value));
