@@ -5,7 +5,7 @@ export const state = {
     points: [
         { x: 2, y: 5 },
         { x: 5, y: 2 },
-        { x: 8, y: 5 },
+        { x: 17, y: 3.3 },
         { x: 5, y: 8 } // Initial Diamond/Circle shape
     ],
 
