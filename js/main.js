@@ -32,6 +32,7 @@ const inputs = {
     canvas2d: document.getElementById('canvas-container'),
     canvas3d: document.getElementById('canvas3d-container'),
     controls3d: document.getElementById('controls-3d'),
+    controlsScale2d: document.getElementById('controls-scale-2d'),
     thickness: document.getElementById('thickness-slider'),
     thicknessVal: document.getElementById('thickness-val'),
     rotation: document.getElementById('rotation-slider'),
@@ -69,6 +70,7 @@ function render(state) {
         inputs.canvas2d.classList.add('hidden');
         inputs.canvas3d.classList.remove('hidden');
         inputs.controls3d.classList.remove('hidden');
+        inputs.controlsScale2d.classList.add('hidden');
         inputs.view3d.classList.add('active');
         inputs.view2d.classList.remove('active');
         requestAnimationFrame(() => resize3D());
@@ -77,6 +79,7 @@ function render(state) {
         inputs.canvas2d.classList.remove('hidden');
         inputs.canvas3d.classList.add('hidden');
         inputs.controls3d.classList.add('hidden');
+        inputs.controlsScale2d.classList.remove('hidden');
         inputs.view2d.classList.add('active');
         inputs.view3d.classList.remove('active');
     }
