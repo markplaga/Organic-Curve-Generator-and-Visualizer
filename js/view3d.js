@@ -211,10 +211,14 @@ export function update3D(nests, state) {
             // Normalize x relative to the shape bounds
             let t = width > 0 ? (x - minX) / width : 0.5;
 
-            // Apply gradient center shift
+            // Apply gradient center shift with edge-case protection (gc can be 0 or 1)
             const gc = state.gradientCenter;
             if (gc !== 0.5) {
-                if (t < gc) {
+                if (gc <= 0) {
+                    t = 0.5 + t * 0.5;
+                } else if (gc >= 1) {
+                    t = t * 0.5;
+                } else if (t < gc) {
                     t = (t / gc) * 0.5;
                 } else {
                     t = 0.5 + ((t - gc) / (1 - gc)) * 0.5;
